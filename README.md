@@ -19,3 +19,12 @@ SF_SECURITY_TOKEN=ABCXYZ123
 SF_CONSUMER_KEY=ZYXCBA321
 SF_CONSUMER_SECRET=987FGHLMN
 ```
+
+#### Authentication
+ - [OAuth 2.0 Username-Password Flow](https://help.salesforce.com/s/articleView?id=sf.remoteaccess_oauth_username_password_flow.htm&type=5)
+    - Consumer Key
+    - Consumer Secret
+    - Username
+    - Password
+    - Security Token
+    - Under Setup -> Identity -> OAuth and OpenID Connect Settings - Enable "Allow OAuth Username-Password Flows"

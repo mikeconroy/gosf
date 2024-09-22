@@ -28,12 +28,13 @@ func main() {
 	sfInstance := sf.New(config.SfInstanceUrl,
 		config.SfUsername,
 		config.SfPassword,
-		config.SfConsumerSecret,
+		config.SfSecurityToken,
 		config.SfConsumerKey,
 		config.SfConsumerSecret)
 	fmt.Println(sfInstance)
 
 	printVersions(sfInstance)
+	sfInstance.Authenticate()
 }
 
 func printVersions(sfInstance sf.Salesforce) {

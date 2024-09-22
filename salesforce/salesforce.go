@@ -4,9 +4,9 @@ type Salesforce struct {
 	InstanceUrl    string
 	Username       string
 	Password       string
+	SecurityToken  string
 	ConsumerKey    string
 	ConsumerSecret string
-	SecurityToken  string
 	ApiVersionPath string
 }
 
@@ -25,9 +25,4 @@ func New(instance, username, password, securityToken, consumerKey, consumerSecre
 	version, _ := sf.GetLatestVersion()
 	sf.ApiVersionPath = version.Url
 	return sf
-}
-
-func (sf Salesforce) Authenticate() (string, error) {
-
-	return "", nil
 }
