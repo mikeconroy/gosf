@@ -6,36 +6,62 @@ import (
 	"github.com/spf13/viper"
 )
 
+type Config struct {
+	SfInstanceUrl    string `mapstructure:"SF_INSTANCE"`
+	SfUsername       string `mapstructure:"SF_USERNAME"`
+	SfPassword       string `mapstructure:"SF_PASSWORD"`
+	SfConsumerKey    string `mapstructure:"SF_CONSUMER_KEY"`
+	SfConsumerSecret string `mapstructure:"SF_CONSUMER_SECRET"`
+	SfSecurityToken  string `mapstructure:"SF_SECURITY_TOKEN"`
+}
+
 /*
  * gosf query "SELECT id FROM Account"
  *
  */
 func main() {
+	config, err := loadConfig()
+	if err != nil {
+		fmt.Println("Failed to load config.", err)
+	}
+
+	sfInstance := sf.New(config.SfInstanceUrl,
+		config.SfUsername,
+		config.SfPassword,
+		config.SfConsumerSecret,
+		config.SfConsumerKey,
+		config.SfConsumerSecret)
+	fmt.Println(sfInstance)
+
+	printVersions(sfInstance)
+}
+
+func printVersions(sfInstance sf.Salesforce) {
+	versionResp, _ := sfInstance.GetVersions()
+	for _, version := range versionResp {
+		fmt.Printf("Label: %s\tURL: %s\tVersion: %s\n", version.Label, version.Url, version.Version)
+	}
+	latestVersion, _ := sfInstance.GetLatestVersion()
+	fmt.Println("Latest Version: " + latestVersion.Version)
+}
+
+func loadConfig() (Config, error) {
+	config := Config{}
 	viper.AddConfigPath(".")
 	viper.SetConfigType("env")
 	viper.SetConfigFile(".env")
 	viper.AutomaticEnv()
 	err := viper.ReadInConfig()
 	if err != nil {
-		fmt.Println("Error reading config.")
-		fmt.Println(err)
-		return
+		return config, err
 	}
 
-	sfInstanceUrl := viper.GetString("SF_INSTANCE")
-	fmt.Println(sfInstanceUrl)
-	sfInstance := sf.Salesforce{
-		InstanceUrl: sfInstanceUrl,
-	}
-	versionResp, _ := sfInstance.GetVersions()
-	for _, version := range versionResp {
-		fmt.Printf("Label: %s\tURL: %s\tVersion: %s\n", version.Label, version.Url, version.Version)
+	err = viper.Unmarshal(&config)
+	if err != nil {
+		return config, err
 	}
 
-	latestVersion, _ := sfInstance.GetLatestVersion()
-	fmt.Println("Latest Version: " + latestVersion.Version)
-
-	sfInstance2 := sf.New(sfInstanceUrl,
-		"username", "password", "securityToken", "consumerKey", "consumerSecret")
-	fmt.Println(sfInstance2)
+	// sfInstanceUrl := viper.GetString("SF_INSTANCE")
+	// fmt.Println(sfInstanceUrl)
+	return config, nil
 }
