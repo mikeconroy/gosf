@@ -35,6 +35,7 @@ func main() {
 
 	printVersions(sfInstance)
 	sfInstance.Authenticate()
+	fmt.Println(sfInstance.TokenExpiryTime)
 }
 
 func printVersions(sfInstance sf.Salesforce) {
