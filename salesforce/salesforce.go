@@ -1,6 +1,7 @@
 package salesforce
 
 import (
+	"net/http"
 	"strconv"
 	"time"
 )
@@ -8,6 +9,7 @@ import (
 type Salesforce struct {
 	InstanceUrl     string
 	ApiVersionPath  string
+	HttpClient      http.Client
 	Authentication  Authenticator
 	TokenValidFor   time.Duration
 	Token           string
@@ -29,6 +31,7 @@ func New(instance, username, password, securityToken, consumerKey, consumerSecre
 	}
 	sf := Salesforce{
 		InstanceUrl:    instance,
+		HttpClient:     *http.DefaultClient,
 		Authentication: auth,
 		TokenValidFor:  2 * time.Hour, // Defaults to a 2 hour token expiry time
 	}
@@ -38,7 +41,7 @@ func New(instance, username, password, securityToken, consumerKey, consumerSecre
 }
 
 func (sf *Salesforce) Authenticate() error {
-	authResp, err := sf.Authentication.Authenticate(sf.InstanceUrl)
+	authResp, err := sf.Authentication.Authenticate(*sf)
 	if err != nil {
 		return err
 	}

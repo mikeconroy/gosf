@@ -31,11 +31,12 @@ func main() {
 		config.SfSecurityToken,
 		config.SfConsumerKey,
 		config.SfConsumerSecret)
-	fmt.Println(sfInstance)
 
-	printVersions(sfInstance)
 	sfInstance.Authenticate()
-	fmt.Println(sfInstance.TokenExpiryTime)
+	queryRes, err := sfInstance.Query("SELECT Id,Name FROM Account")
+	for _, record := range queryRes.Records {
+		fmt.Println("ID:", record["Id"], "Name:", record["Name"])
+	}
 }
 
 func printVersions(sfInstance sf.Salesforce) {

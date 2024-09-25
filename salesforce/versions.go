@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
 )
 
 type VersionResponse struct {
@@ -14,7 +13,7 @@ type VersionResponse struct {
 }
 
 func (sf Salesforce) GetVersions() ([]VersionResponse, error) {
-	resp, err := http.Get(sf.InstanceUrl + "/services/data/")
+	resp, err := sf.HttpClient.Get(sf.InstanceUrl + "/services/data/")
 	if resp == nil {
 		fmt.Println("Get Versions API Call return nil.")
 		return nil, err

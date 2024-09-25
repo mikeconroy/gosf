@@ -19,7 +19,7 @@ type AuthenticateResponse struct {
 }
 
 type Authenticator interface {
-	Authenticate(string) (AuthenticateResponse, error)
+	Authenticate(Salesforce) (AuthenticateResponse, error)
 }
 
 type UsernamePasswordAuthenticator struct {
@@ -30,20 +30,19 @@ type UsernamePasswordAuthenticator struct {
 	ConsumerSecret string
 }
 
-func (auth UsernamePasswordAuthenticator) Authenticate(instanceUrl string) (AuthenticateResponse, error) {
-	client := &http.Client{}
+func (auth UsernamePasswordAuthenticator) Authenticate(sf Salesforce) (AuthenticateResponse, error) {
 	data := url.Values{}
 	data.Set("grant_type", "password")
 	data.Set("client_id", auth.ConsumerKey)
 	data.Set("client_secret", auth.ConsumerSecret)
 	data.Set("username", auth.Username)
 	data.Set("password", auth.Password+auth.SecurityToken)
-	req, err := http.NewRequest("POST", instanceUrl+"/services/oauth2/token", strings.NewReader(data.Encode()))
+	req, err := http.NewRequest("POST", sf.InstanceUrl+"/services/oauth2/token", strings.NewReader(data.Encode()))
 	if err != nil {
 		return AuthenticateResponse{}, err
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	resp, err := client.Do(req)
+	resp, err := sf.HttpClient.Do(req)
 	if err != nil {
 		return AuthenticateResponse{}, err
 	}
