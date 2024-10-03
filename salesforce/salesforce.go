@@ -29,6 +29,10 @@ func New(instance, username, password, securityToken, consumerKey, consumerSecre
 		ConsumerSecret: consumerSecret,
 		SecurityToken:  securityToken,
 	}
+	// auth2 := ClientCredentialsAuthenticator{
+	// ConsumerKey:    consumerKey,
+	// ConsumerSecret: consumerSecret,
+	// }
 	sf := Salesforce{
 		InstanceUrl:    instance,
 		HttpClient:     *http.DefaultClient,
