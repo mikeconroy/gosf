@@ -20,6 +20,9 @@ type Config struct {
  *
  */
 func main() {
+
+	sf.JWTBearerAuthenticator{}.Authenticate(sf.Salesforce{})
+	return
 	config, err := loadConfig()
 	if err != nil {
 		fmt.Println("Failed to load config.", err)

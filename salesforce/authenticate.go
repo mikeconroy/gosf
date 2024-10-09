@@ -1,12 +1,18 @@
 package salesforce
 
 import (
+	"crypto"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 const (
@@ -91,4 +97,48 @@ func (auth ClientCredentialsAuthenticator) Authenticate(sf Salesforce) (Authenti
 		fmt.Println("Cannot unmarshal JSON")
 	}
 	return result, err
+}
+
+type JWTBearerAuthenticator struct {
+	ConsumerKey string
+	Username    string
+	PrivateKey  []byte
+}
+
+func (auth JWTBearerAuthenticator) Authenticate(sf Salesforce) (AuthenticateResponse, error) {
+	jwt, _ := auth.GenerateJWT(sf)
+	fmt.Println(jwt)
+	return AuthenticateResponse{}, nil
+}
+
+func (auth JWTBearerAuthenticator) GenerateJWT(sf Salesforce) (string, error) {
+	//TODO: Replace this with loading an actual private key
+	privateKey, err := rsa.GenerateKey(rand.Reader, 1024)
+
+	header := []byte("{\"alg\":\"RS256\"}")
+	encodedHeader := base64.StdEncoding.EncodeToString(header)
+
+	issuer := auth.ConsumerKey
+	audience := sf.InstanceUrl
+	subject := auth.Username
+	expiry := fmt.Sprint(time.Now().Add(15 * time.Minute).Unix())
+	payload := []byte("{" +
+		"\"iss\":\"" + issuer + "\"," +
+		"\"aud\":\"" + audience + "\"," +
+		"\"sub\":\"" + subject + "\"," +
+		"\"exp\":\"" + expiry + "\"}")
+	encodedPayload := base64.StdEncoding.EncodeToString(payload)
+
+	hash := sha256.New()
+	hash.Write(payload)
+	digest := hash.Sum(nil)
+
+	signature, err := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA256, digest)
+	if err != nil {
+		return "", err
+	}
+	encodedSignature := base64.StdEncoding.EncodeToString(signature)
+
+	token := encodedHeader + "." + encodedPayload + "." + encodedSignature
+	return token, err
 }
