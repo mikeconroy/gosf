@@ -102,7 +102,7 @@ func (auth ClientCredentialsAuthenticator) Authenticate(sf Salesforce) (Authenti
 type JWTBearerAuthenticator struct {
 	ConsumerKey string
 	Username    string
-	PrivateKey  []byte
+	PrivateKey  *rsa.PrivateKey
 }
 
 func (auth JWTBearerAuthenticator) Authenticate(sf Salesforce) (AuthenticateResponse, error) {
@@ -112,8 +112,6 @@ func (auth JWTBearerAuthenticator) Authenticate(sf Salesforce) (AuthenticateResp
 }
 
 func (auth JWTBearerAuthenticator) GenerateJWT(sf Salesforce) (string, error) {
-	//TODO: Replace this with loading an actual private key
-	privateKey, err := rsa.GenerateKey(rand.Reader, 1024)
 
 	header := []byte("{\"alg\":\"RS256\"}")
 	encodedHeader := base64.StdEncoding.EncodeToString(header)
@@ -133,7 +131,7 @@ func (auth JWTBearerAuthenticator) GenerateJWT(sf Salesforce) (string, error) {
 	hash.Write(payload)
 	digest := hash.Sum(nil)
 
-	signature, err := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA256, digest)
+	signature, err := rsa.SignPKCS1v15(rand.Reader, auth.PrivateKey, crypto.SHA256, digest)
 	if err != nil {
 		return "", err
 	}

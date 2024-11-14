@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
 	"fmt"
 	sf "github.com/mikeconroy/gosf/salesforce"
 	"github.com/spf13/viper"
@@ -21,7 +23,12 @@ type Config struct {
  */
 func main() {
 
-	sf.JWTBearerAuthenticator{}.Authenticate(sf.Salesforce{})
+	privateKey, err := rsa.GenerateKey(rand.Reader, 1024)
+	sf.JWTBearerAuthenticator{
+		ConsumerKey: "ABC",
+		Username:    "test@test.com",
+		PrivateKey:  privateKey,
+	}.Authenticate(sf.Salesforce{})
 	return
 	config, err := loadConfig()
 	if err != nil {
